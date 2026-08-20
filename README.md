@@ -31,6 +31,12 @@ a card for identity verification, which this project deliberately avoids requiri
 [`DEPLOYMENT.md`](DEPLOYMENT.md) for the full story (including a Hugging Face Spaces attempt
 that hit a genuine platform wall) and how to run it locally in under 5 minutes — see Setup below.
 
+**UI walkthrough** — the real `webapp/` frontend against the real FastAPI backend, no Supabase or LLM key configured (both fall back to the local JSON store, per the architecture diagram below):
+
+![UI walkthrough of the webapp frontend](docs/demo_ui.gif)
+
+Uploading a real policy document runs the actual ingestion pipeline (parsing -> chunking -> embedding -> classifying) end to end. Generating a gap report initially came back completely empty — turned out `data_pipeline/regulations/*.json` (the real, previously-scraped AI Act/NIS2/CSRD article text) had never actually been run through `chunk_and_embed.py` into the local store, so there were zero regulation clauses to match against. Ran it for all three regulations (154 + 64 + 56 chunks indexed) and the gap report populated with real article numbers and headings. Every clause still shows "Needs human review" — the app's own UI honestly says why: `Classifier checkpoint not found`. The relevance classifier (`pytorch_classifier/`) has real training code but only a 3-row example dataset (`data/labeled_pairs_template.csv`), not an actual labeled training set, so nothing has ever been trained. Left as-is rather than fabricating labels to force a trained model.
+
 ## Status
 
 Weeks 1–3 of the build plan are functionally complete and verified end-to-end against real
